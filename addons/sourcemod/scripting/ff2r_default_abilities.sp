@@ -832,11 +832,11 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 					int button = ability.GetInt("button", 11);
 					if(SpecialCharge[client])
 					{
-						if(button == 11)	// IN_ATTACK2 -> IN_RELOAD
+						if(button == 11)
 						{
-							button = 13;
+							button = SpecialChargeButton[client];
 						}
-						else if(button == 13)	// IN_RELOAD -> IN_ATTACK2
+						else if(button == SpecialChargeButton[client])
 						{
 							button = 11;
 						}
@@ -1933,10 +1933,10 @@ public void Hook_ProjectileSpawned(int entity)
 				ConfigData cfg = ability.GetSection(buffer);
 				if(cfg)
 				{
-					if(ability.GetString("model", buffer, sizeof(buffer)))
+					if(cfg.GetString("model", buffer, sizeof(buffer)))
 						SetEntityModel(entity, buffer);
 					
-					float scale = ability.GetFloat("scale", 1.0);
+					float scale = cfg.GetFloat("scale", 1.0);
 					if(scale != 1.0 && scale > 0.0)
 						SetEntPropFloat(client, Prop_Send, "m_flModelScale", GetEntPropFloat(client, Prop_Send, "m_flModelScale") * scale);
 				}

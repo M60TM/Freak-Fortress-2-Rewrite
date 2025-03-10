@@ -1,6 +1,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define SAPPER_MAX_DISTANCE_SQAURE (160.0 * 160.0)
+
 static ArrayList BossList;
 static ArrayList PackList;
 static int DownloadTable;
@@ -2109,7 +2111,10 @@ void Bosses_PlayerRunCmd(int client, int buttons)
 					int target = GetClientAimTarget(client, true);
 					if(target != -1)
 					{
-						if(Client(target).IsBoss && (GetClientTeam(client) != GetClientTeam(target) || Cvar[FriendlyFire].BoolValue))
+						float pos1[3], pos2[3];
+						GetClientAbsOrigin(client, pos1);
+						GetClientAbsOrigin(target, pos2);
+						if(GetVectorDistance(pos1, pos2, true) < SAPPER_MAX_DISTANCE_SQAURE && Client(target).IsBoss && (GetClientTeam(client) != GetClientTeam(target) || Cvar[FriendlyFire].BoolValue))
 						{
 							TF2_AddCondition(target, TFCond_Sapped, 4.0);
 							Client(client).SapperCooldownFor = time + 15.0;

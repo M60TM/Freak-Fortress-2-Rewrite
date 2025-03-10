@@ -141,7 +141,6 @@ void Gamemode_RoundSetup()
 		if(Waiting)
 		{
 			Cvar[Tournament].BoolValue = true;
-			Cvar[MovementFreeze].BoolValue = false;
 			ServerCommand("mp_waitingforplayers_restart 1");
 		}
 		else if(!GameRules_GetProp("m_bInWaitingForPlayers", 1))
@@ -289,6 +288,7 @@ public void TF2_OnWaitingForPlayersStart()
 	if(Enabled && GameRules_GetProp("m_bInWaitingForPlayers", 1))	// Yes, m_bInWaitingForPlayers is needed here
 	{
 		Waiting = false;
+		Cvar[MovementFreeze].BoolValue = false;
 		Cvar[Tournament].BoolValue = false;
 		CreateTimer(4.0, Gamemode_TimerRespawn, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 
