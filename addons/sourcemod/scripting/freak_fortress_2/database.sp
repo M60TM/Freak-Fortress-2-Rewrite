@@ -51,11 +51,21 @@ static void Database_Connected(Database db, const char[] error, any data)
 		tr.AddQuery("CREATE TABLE IF NOT EXISTS " ... DATATABLE_DIFFICULTY ... " ("
 		... "steamid INTEGER NOT NULL, "
 		... "name TEXT NOT NULL);");
-		
-		tr.AddQuery("CREATE TABLE IF NOT EXISTS " ... DATATABLE_RANKING ... " ("
-		... "steamid INTEGER NOT NULL, "
-		... "boss TEXT NOT NULL, "
-		... "rank INTEGER NOT NULL);");
+
+		if (Database_IsMysqlDriver(db))
+		{
+			tr.AddQuery("CREATE TABLE IF NOT EXISTS " ... DATATABLE_RANKING ... " ("
+			... "steamid INTEGER NOT NULL, "
+			... "boss TEXT NOT NULL, "
+			... "`rank` INTEGER NOT NULL);");
+		}
+		else
+		{
+			tr.AddQuery("CREATE TABLE IF NOT EXISTS " ... DATATABLE_RANKING ... " ("
+			... "steamid INTEGER NOT NULL, "
+			... "boss TEXT NOT NULL, "
+			... "rank INTEGER NOT NULL);");
+		}
 		
 		db.Execute(tr, Database_SetupCallback, Database_FailHandle, db);
 	}
@@ -331,7 +341,14 @@ void Database_ClientDisconnect(int client, DBPriority priority = DBPrio_Normal)
 						int rank = Ranking_GetRank(client, buffer);
 						if(rank)
 						{
-							DataBase.Format(buffer, sizeof(buffer), "INSERT INTO " ... DATATABLE_RANKING ... " (steamid, boss, rank) VALUES ('%d', '%s', '%d')", id, buffer, rank);
+							if (Database_IsMysqlDriver(db))
+							{
+								DataBase.Format(buffer, sizeof(buffer), "INSERT INTO " ... DATATABLE_RANKING ... " (steamid, boss, `rank`) VALUES ('%d', '%s', '%d')", id, buffer, rank);
+							}
+							else
+							{
+								DataBase.Format(buffer, sizeof(buffer), "INSERT INTO " ... DATATABLE_RANKING ... " (steamid, boss, rank) VALUES ('%d', '%s', '%d')", id, buffer, rank);
+							}
 							tr.AddQuery(buffer);
 						}
 					}
@@ -362,4 +379,11 @@ static void Database_FailHandle(Database db, any data, int numQueries, const cha
 {
 	LogError("[Database] %s", error);
 	CloseHandle(data);
+}
+
+static void Database_IsMysqlDriver(Database db)
+{
+	char ident[32];
+	db.Driver.GetIdentifier(ident, sizeof(ident));
+	return StrEqual(ident, "mysql", false);
 }
